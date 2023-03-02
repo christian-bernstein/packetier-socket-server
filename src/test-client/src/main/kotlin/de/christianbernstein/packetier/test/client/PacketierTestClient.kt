@@ -82,8 +82,6 @@ class PacketierTestClient(
         }
     }
 
-    suspend fun send(data: Any) = this.socket.send(Json.encodeToString(data))
-
     fun log(message: Any) = LoggerFactory
         .getLogger(this.javaClass)
         .debug("[${this.name}] $message")

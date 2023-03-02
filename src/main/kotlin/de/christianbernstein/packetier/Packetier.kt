@@ -70,7 +70,6 @@ class Packetier {
         this@Packetier.initMainSocketRoute(this)
     }.also { this@Packetier.socketEngine = it }.start(wait = true)
 
-
     /**
      * @param wait
      *  IF true: After ktor init: Wait here.
