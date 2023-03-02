@@ -45,7 +45,7 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
         this.pub(senderID, receiverID, packet)
     }
 
-    fun handle(senderID: String, receiverID: String, packet: Packet): Unit = with(requireNotNull(sessions[receiverID])) {
+    fun handle(senderID: String, receiverID: String, packet: Packet): Unit = with(requireNotNull(sessions[receiverID]) { "Session '$receiverID' wasn't found." }) {
         try {
             if (packet.packetType == PacketType.RESPONSE) {
                 responseContracts.remove(packet.conversationID).run {
