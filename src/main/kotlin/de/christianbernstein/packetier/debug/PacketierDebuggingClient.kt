@@ -1,5 +1,6 @@
 package de.christianbernstein.packetier.debug
 
+import de.christianbernstein.packetier.engine.Packet
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*
@@ -8,6 +9,8 @@ import io.ktor.websocket.*
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.concurrent.thread
@@ -71,6 +74,8 @@ class PacketierDebuggingClient(
     }
 
     private suspend fun userSuit() = this.suite()
+
+    suspend fun send(packet: Packet) = this.socket.send(Json.encodeToString(value = packet))
 
     suspend fun test(skip: Boolean = false, test: suspend () -> Unit) {
         try {
