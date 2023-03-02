@@ -1,4 +1,4 @@
-package de.christianbernstein.packetier.test.client
+package de.christianbernstein.packetier.debug
 
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
@@ -8,18 +8,16 @@ import io.ktor.websocket.*
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.concurrent.thread
 
 @Suppress("MemberVisibilityCanBePrivate")
-class PacketierTestClient(
+class PacketierDebuggingClient(
     var name: String = UUID.randomUUID().toString(),
     var path: String = "/main",
-    val configurator: PacketierTestClient.() -> Unit = {},
-    val suite: suspend PacketierTestClient.() -> Unit
+    val configurator: PacketierDebuggingClient.() -> Unit = {},
+    val suite: suspend PacketierDebuggingClient.() -> Unit
 ) {
 
     lateinit var http: HttpClient
@@ -48,9 +46,9 @@ class PacketierTestClient(
     }
 
     private fun start() = runBlocking {
-        HttpClient { install(WebSockets) }.also { this@PacketierTestClient.http = it }.run {
-            webSocket(method = HttpMethod.Get, host = "127.0.0.1", port = 8080, path = this@PacketierTestClient.path) {
-                this@PacketierTestClient.socket = this
+        HttpClient { install(WebSockets) }.also { this@PacketierDebuggingClient.http = it }.run {
+            webSocket(method = HttpMethod.Get, host = "127.0.0.1", port = 8080, path = this@PacketierDebuggingClient.path) {
+                this@PacketierDebuggingClient.socket = this
                 val readMessageRoutine = launch { readMessages() }
                 val userSuitRoutine = launch { userSuit() }
                 readMessageRoutine.join()

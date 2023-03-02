@@ -18,17 +18,18 @@ val ktorVersion: String by project
 val logbackVersion: String by project
 
 dependencies {
-    implementation("io.ktor:ktor-server-core-jvm:2.2.4")
-    implementation("io.ktor:ktor-server-netty-jvm:2.2.4")
-    implementation("io.ktor:ktor-server-websockets:2.2.4")
+    implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-websockets:$ktorVersion")
     testImplementation(kotlin("test"))
 
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-    testImplementation("io.ktor:ktor-client-core-jvm:2.2.4")
-    testImplementation("io.ktor:ktor-client-cio-jvm:2.2.4")
-    testImplementation("io.ktor:ktor-client-websockets-jvm:2.2.4")
+
+    implementation("io.ktor:ktor-client-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-client-websockets-jvm:$ktorVersion")
 }
 
 tasks.test {
