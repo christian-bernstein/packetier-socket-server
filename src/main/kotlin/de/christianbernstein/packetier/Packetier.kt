@@ -65,18 +65,31 @@ class Packetier {
         }
     }
 
-    fun init() {
-        CompletableDeferred<Unit>().run {
-            thread(start = true) {
-                embeddedServer(Netty, port = 8080) {
-                    install(WebSockets)
-                    this@Packetier.initMainSocketRoute(this)
-                }.also { this@Packetier.socketEngine = it }.start(wait = false).also {
-                    println("Completing web init")
-                    this.complete(Unit)
+    private fun startEmbeddedServer(wait: Boolean): NettyApplicationEngine = embeddedServer(Netty, port = 8080) {
+        install(WebSockets)
+        this@Packetier.initMainSocketRoute(this)
+    }.also { this@Packetier.socketEngine = it }.start(wait = true)
+
+
+    /**
+     * @param wait
+     *  IF true: After ktor init: Wait here.
+     *  IF false: After ktor init: Complete future & return from init method -> If no thread blocking JVM: JVM stopps
+     */
+    fun init(wait: Boolean = false) {
+        if (wait) {
+            // After ktor init: Wait here
+            this.startEmbeddedServer(true)
+        } else {
+            // After ktor init: Complete future & return from init method -> If no thread blocking JVM: JVM stopps
+            CompletableDeferred<Unit>().run {
+                thread(start = true) {
+                    startEmbeddedServer(false).also {
+                        this.complete(Unit)
+                    }
                 }
+                runBlocking { this@run.await() }
             }
-            runBlocking { this@run.await() }
         }
     }
 
