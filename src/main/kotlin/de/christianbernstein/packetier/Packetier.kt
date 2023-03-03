@@ -22,10 +22,6 @@ import kotlin.concurrent.thread
 @Suppress("ExtractKtorModule")
 class Packetier {
 
-    init {
-
-    }
-
     companion object {
         const val PACKETIER_SERVER_ID = "packetier-server"
     }
