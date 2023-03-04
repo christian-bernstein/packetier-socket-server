@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import kotlin.concurrent.thread
 
-@Suppress("MemberVisibilityCanBePrivate")
+@Suppress("MemberVisibilityCanBePrivate", "unused")
 class PacketierDebuggingClient(
     var name: String = UUID.randomUUID().toString(),
     var path: String = "/main",
