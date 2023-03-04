@@ -55,15 +55,13 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
                 return@with
             }
 
-            subscriber(
-                PacketSubscriberContext(
+            subscriber(PacketSubscriberContext(
                 senderID = senderID,
                 receiverID = receiverID,
                 engine = this@PacketEngine,
                 packet = packet,
                 session = this
-            )
-            )
+            ))
         } catch (e: Exception) {
             this@PacketEngine.logger.error("Error while handling packet")
             e.printStackTrace()
