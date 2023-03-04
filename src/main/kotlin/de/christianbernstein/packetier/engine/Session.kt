@@ -1,5 +1,8 @@
 package de.christianbernstein.packetier.engine
 
+import de.christianbernstein.packetier.event.EventBus
+
+@Suppress("unused")
 data class Session(
     val id: String,
     val engine: PacketEngine,
@@ -8,6 +11,8 @@ data class Session(
     // Session-specific data
     var sessionCache: MutableMap<String, Any> = mutableMapOf()
 ) {
+
+    val bus: EventBus = EventBus()
 
     /**
      * Obtain a value from the cached property store.
