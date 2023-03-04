@@ -22,16 +22,22 @@ class EventBus {
         ?.filterIsInstance<IEventListener<Event>>()
         ?.forEach { it.handle(event) }
 
-    inline operator fun <reified T : Event> plus(listener: IEventListener<T>) = this.register(listener)
-
-    inline operator fun <reified T : Event> plus(crossinline listener: (event: T) -> Unit) = this.register(object : IEventListener<T> {
-        override fun handle(event: T) = listener(event)
-    })
-
     inline fun <reified T : Event> register(crossinline handler: T.() -> Unit) = this.register(object : IEventListener<T> {
         override fun handle(event: T) = event.handler()
     })
 
+    // TODO: Remove
+    @Deprecated("No more operator stuff..", ReplaceWith("this.register(handler)"))
+    inline operator fun <reified T : Event> plus(listener: IEventListener<T>) = this.register(listener)
+
+    // TODO: Remove
+    @Deprecated("No more operator stuff..", ReplaceWith("this.register(handler)"))
+    inline operator fun <reified T : Event> plus(crossinline listener: (event: T) -> Unit) = this.register(object : IEventListener<T> {
+        override fun handle(event: T) = listener(event)
+    })
+
+    // TODO: Maybe remove
+    @Deprecated("No more operator stuff..", ReplaceWith("this.register(handler)"))
     @JvmName("unknown_add")
     inline operator fun plus(crossinline listener: (event: Event) -> Unit) = this.register(object :
         IEventListener<Event> {
