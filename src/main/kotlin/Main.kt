@@ -7,7 +7,7 @@ fun main(args: Array<String>) {
 
         this.packetEngine.createSession("a") {
             bus.register<SessionMessageReceivedEvent> {
-                println("Session received a message")
+                println("Session $id received a message")
             }
         }
 
