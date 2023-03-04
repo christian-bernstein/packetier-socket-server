@@ -4,7 +4,6 @@ import de.christianbernstein.packetier.engine.Packet
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*
-import io.ktor.util.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancelAndJoin
@@ -15,7 +14,6 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.function.Predicate
 import kotlin.concurrent.thread
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
@@ -70,11 +68,8 @@ class PacketierDebuggingClient(
             for (message in incoming) {
                 message as? Frame.Text ?: continue
                 val rawMessage = message.readText()
-
-                // TODO: remove
-                log("Message received: '$rawMessage'")
-
                 val packet: Packet = Json.decodeFromString(rawMessage)
+                log("Packet received: '${rawMessage}'")
                 try {
                     this@PacketierDebuggingClient.globalPacketInterceptors.values.forEach { it(packet) }
                 } catch (e: Exception) {

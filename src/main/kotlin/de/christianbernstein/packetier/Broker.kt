@@ -3,7 +3,6 @@ package de.christianbernstein.packetier
 import de.christianbernstein.packetier.engine.Packet
 import de.christianbernstein.packetier.engine.PacketEngine
 import de.christianbernstein.packetier.engine.PacketierNetAdapter
-import de.christianbernstein.packetier.engine.Session
 import de.christianbernstein.packetier.engine.packets.ActivationPacket
 import de.christianbernstein.packetier.socket.Connection
 import io.ktor.server.application.*
@@ -22,7 +21,7 @@ import kotlin.collections.LinkedHashSet
 import kotlin.concurrent.thread
 
 @Suppress("ExtractKtorModule")
-class Packetier {
+class Broker {
 
     companion object {
         const val PACKETIER_SERVER_ID = "packetier-server"
@@ -42,7 +41,7 @@ class Packetier {
 
     private fun generatePacketierBridge(): PacketierNetAdapter = object : PacketierNetAdapter() {
 
-        override fun pub(senderID: String, receiverID: String, packet: Packet): Unit = this@Packetier
+        override fun pub(senderID: String, receiverID: String, packet: Packet): Unit = this@Broker
             .connections
             .first { it.id.toString() == receiverID }
             .session
@@ -53,7 +52,7 @@ class Packetier {
             }
 
         override fun broadPub(senderID: String, packet: Packet): Unit = Json.encodeToString(packet).let { msg ->
-            this@Packetier.connections.forEach {
+            this@Broker.connections.forEach {
                 it.session.run {
                     launch {
                         try {
@@ -69,8 +68,8 @@ class Packetier {
 
     private fun startEmbeddedServer(wait: Boolean): NettyApplicationEngine = embeddedServer(Netty, port = 8080) {
         install(WebSockets)
-        this@Packetier.initMainSocketRoute(this)
-    }.also { this@Packetier.socketEngine = it }.start(wait = wait)
+        this@Broker.initMainSocketRoute(this)
+    }.also { this@Broker.socketEngine = it }.start(wait = wait)
 
     /**
      * @param wait
@@ -99,15 +98,15 @@ class Packetier {
             webSocket("main") {
                 val con = Connection(this)
                 try {
-                    this@Packetier.onConnectionInit(con)
+                    this@Broker.onConnectionInit(con)
                     for (frame in incoming) {
                         frame as? Frame.Text ?: continue
-                        this@Packetier.onMessage(con, frame.readText())
+                        this@Broker.onMessage(con, frame.readText())
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 } finally {
-                    this@Packetier.onConnectionClose(con)
+                    this@Broker.onConnectionClose(con)
                 }
             }
         }
@@ -122,6 +121,7 @@ class Packetier {
     }
 
     private fun onConnectionClose(connection: Connection) {
+        logger.debug("Closing connection ${connection.id}")
         this.packetEngine.closeSession(connection.id)
         connections -= connection
     }

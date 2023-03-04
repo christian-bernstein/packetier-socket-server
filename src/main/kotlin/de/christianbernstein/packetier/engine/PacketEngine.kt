@@ -21,9 +21,7 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
 
     fun broadPub(senderID: String, packet: Packet): Unit = this.netAdapter.broadPub(senderID, packet)
 
-    // fun sub(subscriber: PacketSubscriberContext.() -> Unit): Unit {}
-
-    fun getAllSessions(): Set<Session> = this.sessions.values.toSet()
+    private fun getAllSessions(): Set<Session> = this.sessions.values.toSet()
 
     fun getSession(id: String): Session = this.getAllSessions().first { it.id == id }
 
@@ -51,7 +49,12 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
     fun handle(senderID: String, receiverID: String, packet: Packet): Unit = with(requireNotNull(sessions[receiverID]) { "Session '$receiverID' wasn't found." }) {
         try {
             val subscriberContext = PacketSubscriberContext(senderID = senderID, receiverID = receiverID, engine = this@PacketEngine, packet = packet, session = this)
+
+            // TODO: Remove
             // Fire pre-handling, generic message event
+            println("About to fire SessionPacketReceivedEvent")
+
+
             this.bus.fire(SessionPacketReceivedEvent(subscriberContext))
             if (packet.packetType == PacketType.RESPONSE) {
                 this@PacketEngine.responseContracts.remove(packet.conversationID).run {

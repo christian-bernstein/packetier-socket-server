@@ -5,4 +5,4 @@ import de.christianbernstein.packetier.event.Event
 
 data class SessionPacketReceivedEvent(
     val ctx: PacketSubscriberContext
-): Event("SessionMessageReceivedEvent")
+): Event("SessionPacketReceivedEvent")

@@ -1,10 +1,10 @@
-import de.christianbernstein.packetier.Packetier
+import de.christianbernstein.packetier.Broker
 import de.christianbernstein.packetier.debug.PacketierDebuggingClient
 import de.christianbernstein.packetier.engine.Packet
 import de.christianbernstein.packetier.engine.events.SessionPacketReceivedEvent
 
 fun main(args: Array<String>) {
-    Packetier().run {
+    Broker().run {
         init(wait = false)
 
         PacketierDebuggingClient("receiver") {
@@ -22,10 +22,11 @@ fun main(args: Array<String>) {
                 e.printStackTrace()
             }
 
-            log("Sending test packet")
-            packetEngine.broadPub("sender", Packet("test"))
 
-            log("User suite finished")
+            PacketierDebuggingClient("sender") {
+                this.awaitPacket { it.type == "ActivationPacket" }
+                this.send(Packet("test"))
+            }
         }
     }
 }
