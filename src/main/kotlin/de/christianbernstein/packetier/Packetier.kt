@@ -130,12 +130,13 @@ class Packetier {
         logger.debug("Initiate connection ${connection.id}")
         this.packetEngine.createSession(connection.id)
         connections += connection
+        logger.debug("Sending activation packet to connection ${connection.id}")
         this.sendActivationPacket(connection.id)
     }
 
     private fun getConnection(connectionID: String): Connection = this.connections.first { it.id == connectionID }
 
-    private suspend fun sendActivationPacket(connectionID: String) = this.sendPacket(connectionID, ActivationPacket())
+    private suspend fun sendActivationPacket(connectionID: String) = this.sendPacket(connectionID, ActivationPacket(connectionID))
 
     private suspend fun sendPacket(connectionID: String, packet: Packet) = this.getConnection(connectionID).session.send(Json.encodeToString(packet))
 }

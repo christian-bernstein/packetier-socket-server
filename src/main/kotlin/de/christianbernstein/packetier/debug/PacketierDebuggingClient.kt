@@ -6,6 +6,7 @@ import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*
 import io.ktor.util.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -14,6 +15,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.util.*
+import java.util.function.Predicate
 import kotlin.concurrent.thread
 
 @Suppress("MemberVisibilityCanBePrivate", "unused")
@@ -34,7 +36,7 @@ class PacketierDebuggingClient(
 
     var skipTest: Boolean = false
 
-    var globalPacketInterceptors: List<(packet: Packet) -> Unit> = mutableListOf()
+    var globalPacketInterceptors: MutableMap<String, (packet: Packet) -> Unit> = mutableMapOf()
 
     init {
         this.init()
@@ -67,14 +69,14 @@ class PacketierDebuggingClient(
         try {
             for (message in incoming) {
                 message as? Frame.Text ?: continue
-                val text = message.readText()
+                val rawMessage = message.readText()
 
                 // TODO: remove
-                log("Message received: '$message'")
+                log("Message received: '$rawMessage'")
 
-                val packet: Packet = Json.decodeFromString(text)
+                val packet: Packet = Json.decodeFromString(rawMessage)
                 try {
-                    this@PacketierDebuggingClient.globalPacketInterceptors.forEach { it(packet) }
+                    this@PacketierDebuggingClient.globalPacketInterceptors.values.forEach { it(packet) }
                 } catch (e: Exception) {
                     error("Exception while handling packet")
                     e.printStackTrace()
@@ -99,8 +101,9 @@ class PacketierDebuggingClient(
         }
     }
 
-    fun addPacketInterceptor(interceptor: (packet: Packet) -> Unit) {
-        this.globalPacketInterceptors += interceptor
+    fun addPacketInterceptor(interceptorID: String = UUID.randomUUID().toString(), interceptor: (packet: Packet) -> Unit): String {
+        this.globalPacketInterceptors[interceptorID] = interceptor
+        return interceptorID
     }
 
     fun log(message: Any) = LoggerFactory
@@ -110,4 +113,17 @@ class PacketierDebuggingClient(
     fun error(message: Any) = LoggerFactory
         .getLogger(this.javaClass)
         .error("[${this.name}] $message")
+
+    fun awaitPacket(predicate: (packet: Packet) -> Boolean): Packet = CompletableDeferred<Packet>().run {
+        runBlocking {
+            val interceptorID = UUID.randomUUID().toString()
+            addPacketInterceptor(interceptorID) {
+                if (predicate(it)) {
+                    this@PacketierDebuggingClient.globalPacketInterceptors.remove(interceptorID)
+                    this@run.complete(it)
+                }
+            }
+        }
+        runBlocking { this@run.await() }
+    }
 }

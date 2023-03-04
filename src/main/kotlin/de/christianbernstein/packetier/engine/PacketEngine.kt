@@ -1,5 +1,6 @@
 package de.christianbernstein.packetier.engine
 
+import de.christianbernstein.packetier.engine.events.SessionPacketReceivedEvent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID
@@ -49,6 +50,9 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
 
     fun handle(senderID: String, receiverID: String, packet: Packet): Unit = with(requireNotNull(sessions[receiverID]) { "Session '$receiverID' wasn't found." }) {
         try {
+            val subscriberContext = PacketSubscriberContext(senderID = senderID, receiverID = receiverID, engine = this@PacketEngine, packet = packet, session = this)
+            // Fire pre-handling, generic message event
+            this.bus.fire(SessionPacketReceivedEvent(subscriberContext))
             if (packet.packetType == PacketType.RESPONSE) {
                 this@PacketEngine.responseContracts.remove(packet.conversationID).run {
                     if (this == null) return@run
@@ -56,13 +60,7 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
                 }
                 return@with
             }
-            this.subscriber(PacketSubscriberContext(
-                senderID = senderID,
-                receiverID = receiverID,
-                engine = this@PacketEngine,
-                packet = packet,
-                session = this
-            ))
+            this.subscriber(subscriberContext)
         } catch (e: Exception) {
             this@PacketEngine.logger.error("Error while handling packet")
             e.printStackTrace()
