@@ -9,6 +9,7 @@ import io.ktor.websocket.*
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
@@ -32,6 +33,8 @@ class PacketierDebuggingClient(
     var async: Boolean = true
 
     var skipTest: Boolean = false
+
+    var globalPacketInterceptors: List<(packet: Packet) -> Unit> = mutableListOf()
 
     init {
         this.init()
@@ -64,7 +67,18 @@ class PacketierDebuggingClient(
         try {
             for (message in incoming) {
                 message as? Frame.Text ?: continue
-                log("Message received: '${message.readText()}'")
+                val text = message.readText()
+
+                // TODO: remove
+                log("Message received: '$message'")
+
+                val packet: Packet = Json.decodeFromString(text)
+                try {
+                    this@PacketierDebuggingClient.globalPacketInterceptors.forEach { it(packet) }
+                } catch (e: Exception) {
+                    error("Exception while handling packet")
+                    e.printStackTrace()
+                }
             }
         } catch (e: Exception) {
             log("Error while receiving: ${e.localizedMessage}")
@@ -83,6 +97,10 @@ class PacketierDebuggingClient(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    fun addPacketInterceptor(interceptor: (packet: Packet) -> Unit) {
+        this.globalPacketInterceptors += interceptor
     }
 
     fun log(message: Any) = LoggerFactory
