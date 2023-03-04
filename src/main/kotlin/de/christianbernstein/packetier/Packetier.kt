@@ -3,7 +3,7 @@ package de.christianbernstein.packetier
 import de.christianbernstein.packetier.engine.Packet
 import de.christianbernstein.packetier.engine.PacketEngine
 import de.christianbernstein.packetier.engine.PacketierNetAdapter
-import de.christianbernstein.packetier.server.Connection
+import de.christianbernstein.packetier.socket.Connection
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*

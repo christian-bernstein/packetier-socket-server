@@ -1,6 +1,6 @@
 package de.christianbernstein.packetier.engine
 
-import de.christianbernstein.packetier.server.EndpointErrorCodes
+import de.christianbernstein.packetier.socket.EndpointErrorCodes
 
 data class PacketSubscriberContext(
     val engine: PacketEngine,

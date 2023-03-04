@@ -1,4 +1,4 @@
-package de.christianbernstein.packetier.server
+package de.christianbernstein.packetier.socket
 
 import io.ktor.websocket.*
 import java.util.concurrent.atomic.AtomicInteger
