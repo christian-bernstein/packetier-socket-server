@@ -4,11 +4,9 @@ import de.christianbernstein.packetier.engine.createProtocol
 fun main(args: Array<String>) {
     Packetier().run {
 
-        this.packetEngine.createSession("", createProtocol(
-            "test" to {
+        this.packetEngine.createSession("a") {
 
-            }
-        ))
+        }
 
         init()
     }

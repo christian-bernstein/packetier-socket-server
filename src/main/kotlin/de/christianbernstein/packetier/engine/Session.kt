@@ -25,4 +25,12 @@ data class Session(
     @Suppress("UNCHECKED_CAST")
     fun <T : Any> setCachedProperty(key: String, value: T): T = value.also { this.sessionCache[key] = it }
 
+    fun handleIncomingMessage(ctx: PacketSubscriberContext): Unit {
+        // Pass message to pre-handler
+
+        // Pass message to user-subscriber
+        this.subscriber(ctx)
+    }
+
+
 }

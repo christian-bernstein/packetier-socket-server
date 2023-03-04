@@ -48,14 +48,13 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
     fun handle(senderID: String, receiverID: String, packet: Packet): Unit = with(requireNotNull(sessions[receiverID]) { "Session '$receiverID' wasn't found." }) {
         try {
             if (packet.packetType == PacketType.RESPONSE) {
-                responseContracts.remove(packet.conversationID).run {
+                this@PacketEngine.responseContracts.remove(packet.conversationID).run {
                     if (this == null) return@run
                     onResolve.accept(packet)
                 }
                 return@with
             }
-
-            subscriber(PacketSubscriberContext(
+            this.subscriber(PacketSubscriberContext(
                 senderID = senderID,
                 receiverID = receiverID,
                 engine = this@PacketEngine,
