@@ -1,13 +1,10 @@
 package de.christianbernstein.packetier.socket
 
 import io.ktor.websocket.*
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 
-class Connection(val session: DefaultWebSocketSession) {
-
-    companion object {
-        val lastId = AtomicInteger(0)
-    }
-
-    val id = lastId.getAndIncrement()
-}
+data class Connection(
+    val session: DefaultWebSocketSession,
+    val id: String = UUID.randomUUID().toString()
+)

@@ -3,6 +3,8 @@ package de.christianbernstein.packetier
 import de.christianbernstein.packetier.engine.Packet
 import de.christianbernstein.packetier.engine.PacketEngine
 import de.christianbernstein.packetier.engine.PacketierNetAdapter
+import de.christianbernstein.packetier.engine.Session
+import de.christianbernstein.packetier.engine.packets.ActivationPacket
 import de.christianbernstein.packetier.socket.Connection
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -54,7 +56,11 @@ class Packetier {
             this@Packetier.connections.forEach {
                 it.session.run {
                     launch {
-                        this@run.send(msg)
+                        try {
+                            this@run.send(msg)
+                        } catch (e: Exception) {
+                            logger.warn("${e.javaClass.name} while broadcasting message: ${e.localizedMessage}")
+                        }
                     }
                 }
             }
@@ -64,7 +70,7 @@ class Packetier {
     private fun startEmbeddedServer(wait: Boolean): NettyApplicationEngine = embeddedServer(Netty, port = 8080) {
         install(WebSockets)
         this@Packetier.initMainSocketRoute(this)
-    }.also { this@Packetier.socketEngine = it }.start(wait = true)
+    }.also { this@Packetier.socketEngine = it }.start(wait = wait)
 
     /**
      * @param wait
@@ -109,19 +115,27 @@ class Packetier {
 
     private fun onMessage(connection: Connection, data: String) {
         this.packetEngine.handle(
-            senderID = connection.id.toString(),
+            senderID = connection.id,
             receiverID = PACKETIER_SERVER_ID,
             packet = Json.decodeFromString(Packet.serializer(), data)
         )
     }
 
     private fun onConnectionClose(connection: Connection) {
-        this.packetEngine.closeSession(connection.id.toString())
+        this.packetEngine.closeSession(connection.id)
         connections -= connection
     }
 
-    private fun onConnectionInit(connection: Connection) {
-        this.packetEngine.createSession(connection.id.toString())
+    private suspend fun onConnectionInit(connection: Connection) {
+        logger.debug("Initiate connection ${connection.id}")
+        this.packetEngine.createSession(connection.id)
         connections += connection
+        this.sendActivationPacket(connection.id)
     }
+
+    private fun getConnection(connectionID: String): Connection = this.connections.first { it.id == connectionID }
+
+    private suspend fun sendActivationPacket(connectionID: String) = this.sendPacket(connectionID, ActivationPacket())
+
+    private suspend fun sendPacket(connectionID: String, packet: Packet) = this.getConnection(connectionID).session.send(Json.encodeToString(packet))
 }

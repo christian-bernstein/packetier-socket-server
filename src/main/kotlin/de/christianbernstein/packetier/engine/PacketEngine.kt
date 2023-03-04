@@ -24,6 +24,8 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
 
     fun getAllSessions(): Set<Session> = this.sessions.values.toSet()
 
+    fun getSession(id: String): Session = this.getAllSessions().first { it.id == id }
+
     fun createSession(id: String = UUID.randomUUID().toString(), subscriber: PacketSubscriber = createProtocol(), init: Session.() -> Unit = {}): Session {
         return Session(id, this, subscriber)
             .also { this.sessions[id] = it }
