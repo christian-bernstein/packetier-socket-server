@@ -124,6 +124,7 @@ class PacketierDebuggingClient(
         runBlocking { this@run.await() }
     }
 
+    // TODO Add return -> Success / Failure -> Internally await packet -> IS RESPONSE
     suspend fun attachToSession(sessionID: String, token: String) {
         this.send(RequestSessionAttachmentPacket(sessionID, token))
     }
