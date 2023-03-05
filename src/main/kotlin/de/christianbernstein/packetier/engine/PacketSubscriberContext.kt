@@ -1,7 +1,5 @@
 package de.christianbernstein.packetier.engine
 
-import de.christianbernstein.packetier.Connection
-
 data class PacketSubscriberContext(
     val engine: PacketEngine,
     val packet: Packet,
@@ -9,7 +7,8 @@ data class PacketSubscriberContext(
     val receiverID: String,
 
     val session: Session,
-    val connection: Connection
+    // TODO: Add connection param
+    // val connection: Connection
 ) {
     fun send(packet: Packet): Unit = this.engine.pub(senderID = this.receiverID, receiverID = this.senderID, packet)
 

@@ -1,6 +1,8 @@
 package de.christianbernstein.packetier.debug
 
+import de.christianbernstein.packetier.debug.packets.RequestSessionAttachmentPacket
 import de.christianbernstein.packetier.engine.Packet
+import de.christianbernstein.packetier.engine.endpoints.RequestSessionAttachmentPacketEndpoint
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*
@@ -120,5 +122,9 @@ class PacketierDebuggingClient(
             }
         }
         runBlocking { this@run.await() }
+    }
+
+    suspend fun attachToSession(sessionID: String, token: String) {
+        this.send(RequestSessionAttachmentPacket(sessionID, token))
     }
 }

@@ -13,8 +13,9 @@ class RequestSessionAttachmentPacketEndpoint: Endpoint("RequestSessionAttachment
         // Authentication failed, session won't be attached
         finishWithAuthorizationError("Provided token was incorrect for selected session")
     } else {
+        // TODO: Check if senderID is correct
         // Authentication succeeded, connection will be attached to selected session
-        connection.packetEngineSessionId = sessionID
+        broker().getConnection(senderID).packetEngineSessionId = sessionID
         finishWithEmptySuccess()
     }
 })

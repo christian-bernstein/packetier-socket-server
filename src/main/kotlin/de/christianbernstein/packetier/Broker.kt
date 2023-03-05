@@ -141,7 +141,7 @@ class Broker {
         this.sendActivationPacket(connection.id)
     }
 
-    private fun getConnection(connectionID: String): Connection = this.connections.first { it.id == connectionID }
+    fun getConnection(connectionID: String): Connection = this.connections.first { it.id == connectionID }
 
     private suspend fun sendActivationPacket(connectionID: String) = this.sendPacket(connectionID, ActivationPacket(connectionID))
 
