@@ -12,6 +12,14 @@ data class Session(
     var sessionCache: MutableMap<String, Any> = mutableMapOf()
 ) {
 
+    /**
+     * External id is part of the dual-id concept.
+     * The external id can be altered via an engine-layer packet.
+     * Constraint: External id, must stille be unique
+     * Packetier won't use external ids internally, but a user / debugger etc. can use them freely without any worries
+     */
+    var externalID: String = this.id
+
     val bus: EventBus = EventBus()
 
     /**

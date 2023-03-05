@@ -25,6 +25,7 @@ class Broker {
 
     companion object {
         const val PACKETIER_SERVER_ID = "packetier-server"
+        var INSTANCE: Broker? = null
     }
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
@@ -34,6 +35,11 @@ class Broker {
     private lateinit var socketEngine: NettyApplicationEngine
 
     var packetEngine: PacketEngine = PacketEngine(this.generatePacketierBridge())
+
+    init {
+        if (INSTANCE != null) throw IllegalStateException("Broker can only be initialized once")
+        INSTANCE = this
+    }
 
     fun shutdown() {
         this.socketEngine.stop(10, 10, TimeUnit.SECONDS)
@@ -140,3 +146,5 @@ class Broker {
 
     private suspend fun sendPacket(connectionID: String, packet: Packet) = this.getConnection(connectionID).session.send(Json.encodeToString(packet))
 }
+
+fun broker(): Broker = Broker.INSTANCE ?: Broker()

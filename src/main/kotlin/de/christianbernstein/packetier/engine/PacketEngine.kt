@@ -13,6 +13,12 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
 
     private val responseContracts: MutableMap<String, ResponseContract> = mutableMapOf()
 
+    private val enginePacketLayer: PacketSubscriber = createProtocol(
+        "" to {
+
+        }
+    )
+
     init {
         this.netAdapter.init(this)
     }
@@ -63,6 +69,14 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
                 }
                 return@with
             }
+
+            // Todo handle engine layer
+            // Handle engine packet-layer messages
+            if (packet.layer == PacketLayerType.ENGINE) {
+
+                return@with
+            }
+
             this.subscriber(subscriberContext)
         } catch (e: Exception) {
             this@PacketEngine.logger.error("Error while handling packet")
