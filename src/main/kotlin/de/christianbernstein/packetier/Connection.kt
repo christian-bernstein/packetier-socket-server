@@ -1,4 +1,4 @@
-package de.christianbernstein.packetier.socket
+package de.christianbernstein.packetier
 
 import io.ktor.websocket.*
 import java.util.UUID

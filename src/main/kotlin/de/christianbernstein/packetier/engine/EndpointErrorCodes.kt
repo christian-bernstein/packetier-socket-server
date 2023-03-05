@@ -1,4 +1,4 @@
-package de.christianbernstein.packetier.socket
+package de.christianbernstein.packetier.engine
 
 enum class EndpointErrorCodes(val code: Int) {
     SUCCESS(0),

@@ -4,7 +4,6 @@ import de.christianbernstein.packetier.engine.Packet
 import de.christianbernstein.packetier.engine.PacketEngine
 import de.christianbernstein.packetier.engine.PacketierNetAdapter
 import de.christianbernstein.packetier.engine.packets.ActivationPacket
-import de.christianbernstein.packetier.socket.Connection
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
