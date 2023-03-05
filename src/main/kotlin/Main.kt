@@ -8,27 +8,24 @@ fun main(args: Array<String>) {
     Broker().run {
         init(wait = false)
 
-        PacketierDebuggingClient("receiver", configurator = {
-            skipTest = false
-        }) {
+        val (sessionID, publicToken) = packetEngine.createSession {
+            setCachedProperty("target", "You got it!")
 
-
-
-            log("User suite started")
-
-            val connectionID = awaitPacket { it.type == "ActivationPacket" }.getString("internalSocketConnectionID")
-
-            log("ActivationPacket received")
-
-            try {
-                this@run.packetEngine.getSession(connectionID).bus.register<SessionPacketReceivedEvent> {
-                    println("Session $id received a message")
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
+            bus.register<SessionPacketReceivedEvent> {
+                println("Session $id received a message")
             }
+        }.let { listOf(it.id, it.publicToken) }
+
+        PacketierDebuggingClient("attachment-test") {
+            attachToSession(sessionID, publicToken)
+        }
 
 
+
+
+
+        PacketierDebuggingClient("receiver", configurator = { skipTest = true }) {
+            // val connectionID = awaitPacket { it.type == "ActivationPacket" }.getString("internalSocketConnectionID")
             PacketierDebuggingClient("sender") {
                 this.awaitPacket { it.type == "ActivationPacket" }
                 this.send(Packet("test"))
