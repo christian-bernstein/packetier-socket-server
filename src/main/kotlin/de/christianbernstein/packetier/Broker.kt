@@ -16,6 +16,8 @@ import kotlinx.serialization.json.*
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.TimeUnit
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
 import kotlin.collections.LinkedHashSet
 import kotlin.concurrent.thread
 
@@ -49,7 +51,7 @@ class Broker {
         override fun pub(senderID: String, receiverID: String, packet: Packet): Unit = this@Broker
             .connections
             .first { it.id.toString() == receiverID }
-            .session
+            .socketSession
             .run {
                 launch {
                     this@run.send(Json.encodeToString(packet))
@@ -58,7 +60,7 @@ class Broker {
 
         override fun broadPub(senderID: String, packet: Packet): Unit = Json.encodeToString(packet).let { msg ->
             this@Broker.connections.forEach {
-                it.session.run {
+                it.socketSession.run {
                     launch {
                         try {
                             this@run.send(msg)
@@ -143,7 +145,16 @@ class Broker {
 
     private suspend fun sendActivationPacket(connectionID: String) = this.sendPacket(connectionID, ActivationPacket(connectionID))
 
-    private suspend fun sendPacket(connectionID: String, packet: Packet) = this.getConnection(connectionID).session.send(Json.encodeToString(packet))
+    private suspend fun sendPacket(connectionID: String, packet: Packet) = this.getConnection(connectionID).socketSession.send(Json.encodeToString(packet))
+
+    /**
+     * TODO: Store salt in file / db
+     */
+    fun generateToken(secret: String): String = SecretKeyFactory
+        .getInstance("PBKDF2WithHmacSHA1")
+        .generateSecret(PBEKeySpec(secret.toCharArray(), "salty salted salt".toByteArray(), 65536, 24))
+        .encoded
+        .let { Base64.getUrlEncoder().encodeToString(it) }
 }
 
 fun broker(): Broker = Broker.INSTANCE ?: Broker()

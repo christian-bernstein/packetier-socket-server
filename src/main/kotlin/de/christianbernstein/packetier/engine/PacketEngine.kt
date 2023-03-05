@@ -1,5 +1,6 @@
 package de.christianbernstein.packetier.engine
 
+import de.christianbernstein.packetier.broker
 import de.christianbernstein.packetier.engine.endpoints.RequestSessionAttachmentPacketEndpoint
 import de.christianbernstein.packetier.engine.events.SessionPacketReceivedEvent
 import org.slf4j.Logger
@@ -31,7 +32,9 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
     fun getSession(id: String): Session = this.getAllSessions().first { it.id == id }
 
     fun createSession(id: String = UUID.randomUUID().toString(), subscriber: PacketSubscriber = createProtocol(), init: Session.() -> Unit = {}): Session {
-        return Session(id, this, subscriber)
+        val tokenBase: String = UUID.randomUUID().toString()
+        val token = broker().generateToken(tokenBase)
+        return Session(id, this, subscriber, publicToken = tokenBase, privateToken = token)
             .also { this.sessions[id] = it }
             .apply(init)
     }
@@ -58,9 +61,8 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
             // TODO: Remove
             // Fire pre-handling, generic message event
             println("About to fire SessionPacketReceivedEvent")
-
-
             this.bus.fire(SessionPacketReceivedEvent(subscriberContext))
+
             if (packet.packetType == PacketType.RESPONSE) {
                 this@PacketEngine.responseContracts.remove(packet.conversationID).run {
                     if (this == null) return@run

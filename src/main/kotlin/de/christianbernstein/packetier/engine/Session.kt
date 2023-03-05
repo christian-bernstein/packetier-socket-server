@@ -9,7 +9,9 @@ data class Session(
     var subscriber: PacketSubscriber,
     var onSessionClosed: () -> Unit = {},
     // Session-specific data
-    var sessionCache: MutableMap<String, Any> = mutableMapOf()
+    var sessionCache: MutableMap<String, Any> = mutableMapOf(),
+    var publicToken: String,
+    var privateToken: String
 ) {
 
     val bus: EventBus = EventBus()

@@ -1,12 +1,15 @@
 package de.christianbernstein.packetier.engine
 
+import de.christianbernstein.packetier.Connection
+
 data class PacketSubscriberContext(
     val engine: PacketEngine,
     val packet: Packet,
     val senderID: String,
     val receiverID: String,
 
-    val session: Session
+    val session: Session,
+    val connection: Connection
 ) {
     fun send(packet: Packet): Unit = this.engine.pub(senderID = this.receiverID, receiverID = this.senderID, packet)
 
@@ -46,6 +49,12 @@ data class PacketSubscriberContext(
     fun finishWithInternalError(message: String? = null) = this.respond(this.generateEndpointResponse(
         success = false,
         code = EndpointErrorCodes.INTERNAL_SERVER_ERROR.code,
+        additionalMessage = message
+    ))
+
+    fun finishWithAuthorizationError(message: String? = null) = this.respond(this.generateEndpointResponse(
+        success = false,
+        code = EndpointErrorCodes.UNAUTHORIZED.code,
         additionalMessage = message
     ))
 }
