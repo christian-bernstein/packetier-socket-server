@@ -1,5 +1,6 @@
 package de.christianbernstein.packetier.engine
 
+import de.christianbernstein.packetier.engine.endpoints.RequestSessionAttachmentPacketEndpoint
 import de.christianbernstein.packetier.engine.events.SessionPacketReceivedEvent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,9 +15,7 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
     private val responseContracts: MutableMap<String, ResponseContract> = mutableMapOf()
 
     private val enginePacketLayer: PacketSubscriber = createProtocol(
-        "" to {
-
-        }
+        RequestSessionAttachmentPacketEndpoint().pair()
     )
 
     init {
@@ -73,7 +72,7 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
             // Todo handle engine layer
             // Handle engine packet-layer messages
             if (packet.layer == PacketLayerType.ENGINE) {
-
+                this@PacketEngine.enginePacketLayer(subscriberContext)
                 return@with
             }
 
