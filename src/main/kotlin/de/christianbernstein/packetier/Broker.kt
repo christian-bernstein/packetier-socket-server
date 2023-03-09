@@ -1,7 +1,9 @@
 package de.christianbernstein.packetier
 
+import de.christianbernstein.packetier.engine.PacketierSocketEngineBase
 import de.christianbernstein.packetier.packets.ActivationPacket
 import de.christianbernstein.packetier.engine.ktor.KtorConnection
+import de.christianbernstein.packetier.engine.ktor.KtorEngine
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -13,27 +15,20 @@ import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.concurrent.TimeUnit
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
-import kotlin.collections.LinkedHashSet
-import kotlin.concurrent.thread
 
 @Suppress("ExtractKtorModule")
-class Broker {
+class Broker<T : PacketierSocketEngineBase>(val socketEngine: T) {
 
     companion object {
         const val PACKETIER_SERVER_ID = "packetier-server"
-        var INSTANCE: Broker? = null
+        var INSTANCE: Broker<*>? = null
     }
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
-    private val connections = Collections.synchronizedSet<KtorConnection?>(LinkedHashSet())
-
-    private lateinit var socketEngine: NettyApplicationEngine
-
-    var packetEngine: PacketEngine = PacketEngine(this.generatePacketierBridge())
+    var packetEngine: PacketEngine = PacketEngine(this.socketEngine.generatePacketierBridge())
 
     init {
         if (INSTANCE != null) throw IllegalStateException("Broker can only be initialized once")
@@ -41,111 +36,12 @@ class Broker {
     }
 
     fun shutdown() {
-        this.socketEngine.stop(10, 10, TimeUnit.SECONDS)
+        this.socketEngine.shutdown()
     }
 
-    private fun generatePacketierBridge(): PacketierNetAdapter = object : PacketierNetAdapter() {
-
-        override fun pub(senderID: String, receiverID: String, packet: Packet): Unit = this@Broker
-            .connections
-            .first { it.id.toString() == receiverID }
-            .socketSession
-            .run {
-                launch {
-                    this@run.send(Json.encodeToString(packet))
-                }
-            }
-
-        override fun broadPub(senderID: String, packet: Packet): Unit = Json.encodeToString(packet).let { msg ->
-            this@Broker.connections.forEach {
-                it.socketSession.run {
-                    launch {
-                        try {
-                            this@run.send(msg)
-                        } catch (e: Exception) {
-                            logger.warn("${e.javaClass.name} while broadcasting message: ${e.localizedMessage}")
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-
-    private fun startEmbeddedServer(wait: Boolean): NettyApplicationEngine = embeddedServer(Netty, port = 8080) {
-        install(WebSockets)
-        this@Broker.initMainSocketRoute(this)
-    }.also { this@Broker.socketEngine = it }.start(wait = wait)
-
-    /**
-     * @param wait
-     *  IF true: After ktor init: Wait here.
-     *  IF false: After ktor init: Complete future & return from init method -> If no thread blocking JVM: JVM stopps
-     */
     fun init(wait: Boolean = false) {
-        if (wait) {
-            // After ktor init: Wait here
-            this.startEmbeddedServer(true)
-        } else {
-            // After ktor init: Complete future & return from init method -> If no thread blocking JVM: JVM stopps
-            CompletableDeferred<Unit>().run {
-                thread(start = true) {
-                    startEmbeddedServer(false).also {
-                        this.complete(Unit)
-                    }
-                }
-                runBlocking { this@run.await() }
-            }
-        }
+        this.socketEngine.start(wait)
     }
-
-    private fun initMainSocketRoute(application: Application): Unit {
-        application.routing {
-            webSocket("main") {
-                val con = KtorConnection(this)
-                try {
-                    this@Broker.onConnectionInit(con)
-                    for (frame in incoming) {
-                        frame as? Frame.Text ?: continue
-                        this@Broker.onMessage(con, frame.readText())
-                    }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                } finally {
-                    this@Broker.onConnectionClose(con)
-                }
-            }
-        }
-    }
-
-    private fun onMessage(connection: KtorConnection, data: String) {
-        this.packetEngine.handle(
-            senderID = connection.id,
-            receiverID = PACKETIER_SERVER_ID,
-            packet = Json.decodeFromString(Packet.serializer(), data)
-        )
-    }
-
-    private fun onConnectionClose(connection: KtorConnection) {
-        logger.debug("Closing connection ${connection.id}")
-        this.packetEngine.closeSession(connection.id)
-        connections -= connection
-    }
-
-    private suspend fun onConnectionInit(connection: KtorConnection) {
-        logger.debug("Initiate connection ${connection.id}")
-        this.packetEngine.createSession(connection.id)
-        connections += connection
-        logger.debug("Sending activation packet to connection ${connection.id}")
-        this.sendActivationPacket(connection.id)
-    }
-
-    fun getConnection(connectionID: String): KtorConnection = this.connections.first { it.id == connectionID }
-
-    private suspend fun sendActivationPacket(connectionID: String) = this.sendPacket(connectionID, ActivationPacket(connectionID))
-
-    private suspend fun sendPacket(connectionID: String, packet: Packet) = this.getConnection(connectionID).socketSession.send(Json.encodeToString(packet))
 
     /**
      * TODO: Store salt in file / db
@@ -157,4 +53,4 @@ class Broker {
         .let { Base64.getUrlEncoder().encodeToString(it) }
 }
 
-fun broker(): Broker = Broker.INSTANCE ?: Broker()
+fun broker(): Broker<*> = Broker.INSTANCE ?: Broker(KtorEngine)

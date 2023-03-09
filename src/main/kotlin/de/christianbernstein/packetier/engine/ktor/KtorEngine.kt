@@ -2,6 +2,7 @@ package de.christianbernstein.packetier.engine.ktor
 
 import de.christianbernstein.packetier.Broker
 import de.christianbernstein.packetier.Packet
+import de.christianbernstein.packetier.PacketierNetAdapter
 import de.christianbernstein.packetier.engine.PacketierSocketEngineBase
 import de.christianbernstein.packetier.packets.ActivationPacket
 import io.ktor.server.application.*
@@ -11,15 +12,17 @@ import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.collections.LinkedHashSet
 import kotlin.concurrent.thread
 
-class KtorEngine: PacketierSocketEngineBase() {
+object KtorEngine : PacketierSocketEngineBase() {
 
     private val connections = Collections.synchronizedSet<KtorConnection?>(LinkedHashSet())
 
@@ -45,6 +48,37 @@ class KtorEngine: PacketierSocketEngineBase() {
                     }
                 }
                 runBlocking { this@run.await() }
+            }
+        }
+    }
+
+    override fun shutdown() {
+        this.socketEngine.stop(10, 10, TimeUnit.SECONDS)
+    }
+
+    override fun generatePacketierBridge(): PacketierNetAdapter = object : PacketierNetAdapter() {
+
+        override fun pub(senderID: String, receiverID: String, packet: Packet): Unit = this@KtorEngine
+            .connections
+            .first { it.id.toString() == receiverID }
+            .socketSession
+            .run {
+                launch {
+                    this@run.send(Json.encodeToString(packet))
+                }
+            }
+
+        override fun broadPub(senderID: String, packet: Packet): Unit = Json.encodeToString(packet).let { msg ->
+            this@KtorEngine.connections.forEach {
+                it.socketSession.run {
+                    launch {
+                        try {
+                            this@run.send(msg)
+                        } catch (e: Exception) {
+                            logger.warn("${e.javaClass.name} while broadcasting message: ${e.localizedMessage}")
+                        }
+                    }
+                }
             }
         }
     }
