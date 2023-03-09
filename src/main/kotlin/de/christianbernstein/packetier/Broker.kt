@@ -28,11 +28,14 @@ class Broker<T : PacketierSocketEngineBase<*>>(val socketEngine: T) {
 
     private val brokerSessions = mutableListOf<BrokerSession>()
 
+    private var startedFlag: Boolean = false
+
     var packetEngine: PacketEngine = PacketEngine(this.socketEngine.generatePacketierBridge())
 
     init {
         if (INSTANCE != null) throw IllegalStateException("Broker can only be initialized once")
         INSTANCE = this
+        this.socketEngine.broker = this
     }
 
     fun shutdown() {
@@ -40,6 +43,8 @@ class Broker<T : PacketierSocketEngineBase<*>>(val socketEngine: T) {
     }
 
     fun init(wait: Boolean = false) {
+        if (startedFlag) throw IllegalStateException("Cannot init broker, broker is already marked as started")
+        this.startedFlag = true
         this.socketEngine.start(wait)
     }
 
@@ -69,3 +74,8 @@ class Broker<T : PacketierSocketEngineBase<*>>(val socketEngine: T) {
 }
 
 fun broker(): Broker<*> = Broker.INSTANCE ?: Broker(KtorEngine)
+
+@Suppress("UNCHECKED_CAST")
+fun <T : PacketierSocketEngineBase<*>> broker(engine: T): Broker<T> {
+    return if (Broker.INSTANCE == null) { Broker(engine) } else { Broker.INSTANCE as Broker<T> }
+}
