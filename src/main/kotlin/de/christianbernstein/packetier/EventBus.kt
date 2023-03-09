@@ -1,4 +1,4 @@
-package de.christianbernstein.packetier.event
+package de.christianbernstein.packetier
 
 import kotlin.reflect.KClass
 
@@ -30,7 +30,8 @@ class EventBus {
         ?.filterIsInstance<IEventListener<Event>>()
         ?.forEach { it.handle(event) }
 
-    inline fun <reified T : Event> register(crossinline handler: T.() -> Unit) = this.register(object : IEventListener<T> {
+    inline fun <reified T : Event> register(crossinline handler: T.() -> Unit) = this.register(object :
+        IEventListener<T> {
         override fun handle(event: T) = event.handler()
     })
 
@@ -40,7 +41,8 @@ class EventBus {
 
     // TODO: Remove
     @Deprecated("No more operator stuff..", ReplaceWith("this.register(handler)"))
-    inline operator fun <reified T : Event> plus(crossinline listener: (event: T) -> Unit) = this.register(object : IEventListener<T> {
+    inline operator fun <reified T : Event> plus(crossinline listener: (event: T) -> Unit) = this.register(object :
+        IEventListener<T> {
         override fun handle(event: T) = listener(event)
     })
 

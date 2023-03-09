@@ -15,7 +15,11 @@ class RequestSessionAttachmentPacketEndpoint: Endpoint("RequestSessionAttachment
     } else {
         // TODO: Check if senderID is correct
         // Authentication succeeded, connection will be attached to selected session
+
+
         broker().getConnection(senderID).packetEngineSessionId = sessionID
+
+
         finishWithEmptySuccess()
     }
 })

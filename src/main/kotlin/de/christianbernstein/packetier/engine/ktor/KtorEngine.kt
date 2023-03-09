@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.collections.LinkedHashSet
 import kotlin.concurrent.thread
 
-object KtorEngine : PacketierSocketEngineBase() {
+object KtorEngine : PacketierSocketEngineBase<KtorConnection>() {
 
     private val connections = Collections.synchronizedSet<KtorConnection?>(LinkedHashSet())
 
@@ -89,7 +89,6 @@ object KtorEngine : PacketierSocketEngineBase() {
         this@KtorEngine.initMainSocketRoute(this)
     }.also { this@KtorEngine.socketEngine = it }.start(wait = wait)
 
-
     private fun initMainSocketRoute(application: Application): Unit {
         application.routing {
             webSocket("main") {
@@ -131,11 +130,11 @@ object KtorEngine : PacketierSocketEngineBase() {
         this.sendActivationPacket(connection.id)
     }
 
-    private fun getConnection(connectionID: String): KtorConnection = this.connections.first { it.id == connectionID }
+    override fun getEngineSession(id: String): KtorConnection = this.connections.first { it.id == id }
 
     private suspend fun sendActivationPacket(connectionID: String) = this.sendPacket(connectionID, ActivationPacket(connectionID))
 
-    private suspend fun sendPacket(connectionID: String, packet: Packet) = this.getConnection(connectionID).socketSession.send(
+    private suspend fun sendPacket(connectionID: String, packet: Packet) = this.getEngineSession(connectionID).socketSession.send(
         Json.encodeToString(packet))
 
 }

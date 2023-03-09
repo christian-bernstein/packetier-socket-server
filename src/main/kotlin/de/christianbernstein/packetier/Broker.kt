@@ -19,7 +19,7 @@ import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
 @Suppress("ExtractKtorModule")
-class Broker<T : PacketierSocketEngineBase>(val socketEngine: T) {
+class Broker<T : PacketierSocketEngineBase<*>>(val socketEngine: T) {
 
     companion object {
         const val PACKETIER_SERVER_ID = "packetier-server"

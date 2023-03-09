@@ -1,7 +1,5 @@
 package de.christianbernstein.packetier
 
-import de.christianbernstein.packetier.event.EventBus
-
 @Suppress("unused")
 data class Session(
     val id: String,

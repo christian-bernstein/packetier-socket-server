@@ -1,11 +1,11 @@
-import de.christianbernstein.packetier.Broker
 import de.christianbernstein.packetier.debug.PacketierDebuggingClient
 import de.christianbernstein.packetier.Packet
+import de.christianbernstein.packetier.broker
 import de.christianbernstein.packetier.events.SessionPacketReceivedEvent
-import de.christianbernstein.packetier.event.Event
+import de.christianbernstein.packetier.Event
 
 fun main(args: Array<String>) {
-    Broker().run {
+    broker().run {
         init(wait = false)
 
         val (sessionID, publicToken) = packetEngine.createSession {
