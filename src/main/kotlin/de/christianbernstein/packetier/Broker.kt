@@ -16,7 +16,7 @@ import java.util.*
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 
-@Suppress("ExtractKtorModule")
+@Suppress("ExtractKtorModule", "MemberVisibilityCanBePrivate")
 class Broker<T : PacketierSocketEngineBase<*>>(val socketEngine: T) {
 
     companion object {
