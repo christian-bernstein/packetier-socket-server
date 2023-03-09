@@ -1,3 +1,5 @@
+package main
+
 import de.christianbernstein.packetier.debug.PacketierDebuggingClient
 import de.christianbernstein.packetier.Packet
 import de.christianbernstein.packetier.broker
@@ -34,4 +36,4 @@ fun main(args: Array<String>) {
 
 class TestEvent(
     val message: String? = "test"
-): Event("TestEvent")
+): Event("main.TestEvent")
