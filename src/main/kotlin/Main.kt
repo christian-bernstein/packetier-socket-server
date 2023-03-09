@@ -20,10 +20,6 @@ fun main(args: Array<String>) {
             attachToSession(sessionID, publicToken)
         }
 
-
-
-
-
         PacketierDebuggingClient("receiver", configurator = { skipTest = true }) {
             // val connectionID = awaitPacket { it.type == "ActivationPacket" }.getString("internalSocketConnectionID")
             PacketierDebuggingClient("sender") {
