@@ -1,5 +1,8 @@
 package de.christianbernstein.packetier.engine
 
+import de.christianbernstein.packetier.Broker
+
 abstract class PacketierSocketEngineBase {
-    abstract fun start(wait: Boolean = true)
+    lateinit var broker: Broker
+    abstract fun start(wait: Boolean = false)
 }
