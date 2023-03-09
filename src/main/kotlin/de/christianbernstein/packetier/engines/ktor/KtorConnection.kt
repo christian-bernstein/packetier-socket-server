@@ -1,6 +1,6 @@
-package de.christianbernstein.packetier.engine.ktor
+package de.christianbernstein.packetier.engines.ktor
 
-import de.christianbernstein.packetier.engine.EngineSession
+import de.christianbernstein.packetier.engines.EngineSession
 import io.ktor.websocket.*
 import java.util.UUID
 

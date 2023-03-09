@@ -1,8 +1,7 @@
-package de.christianbernstein.packetier.engine
+package de.christianbernstein.packetier.engines
 
 import de.christianbernstein.packetier.Broker
 import de.christianbernstein.packetier.PacketierNetAdapter
-import java.util.concurrent.TimeUnit
 
 abstract class PacketierSocketEngineBase<T : EngineSession> {
     lateinit var broker: Broker<*>
