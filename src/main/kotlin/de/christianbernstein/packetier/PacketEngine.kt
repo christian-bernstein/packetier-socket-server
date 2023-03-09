@@ -66,11 +66,13 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
     }
 
     fun handle(senderID: String, receiverID: String, packet: Packet) {
+        // TODO: Handle error
         if (packet.packetType == PacketType.RESPONSE) {
             this.handleResponsePacket(senderID, receiverID, packet)
             return
         }
 
+        // TODO: Handle error
         if (packet.layer == PacketLayerType.ENGINE) {
             this.handleEngineLayerPacket(senderID, receiverID, packet)
             return
