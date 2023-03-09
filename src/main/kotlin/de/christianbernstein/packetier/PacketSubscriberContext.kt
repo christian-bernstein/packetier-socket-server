@@ -6,7 +6,7 @@ data class PacketSubscriberContext(
     val senderID: String,
     val receiverID: String,
 
-    val session: Session,
+    val session: Session?,
     // TODO: Add connection param
     // val connection: Connection
 ) {
@@ -17,8 +17,7 @@ data class PacketSubscriberContext(
         packetType = PacketType.SINGLETON,
         conversationID = this.packet.conversationID,
         data = data
-    )
-    )
+    ))
 
     fun respond(data: Map<String, Any>): Unit = this.engine.pub(senderID = this.receiverID, receiverID = this.senderID, packet = Packet(
         type = "response@${this.packet.type}",

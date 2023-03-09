@@ -53,33 +53,36 @@ class PacketEngine(private val netAdapter: PacketierNetAdapter) {
         this.pub(senderID, receiverID, packet)
     }
 
-    fun handle(senderID: String, receiverID: String, packet: Packet): Unit = with(requireNotNull(sessions[receiverID]) { "Session '$receiverID' wasn't found." }) {
+    private fun handleEngineLayerPacket(senderID: String, receiverID: String, packet: Packet) {
+        val engineSubscriberContext = PacketSubscriberContext(senderID = senderID, receiverID = receiverID, engine = this@PacketEngine, packet = packet, session = null)
+        this@PacketEngine.enginePacketLayer(engineSubscriberContext)
+    }
+
+    private fun handleResponsePacket(senderID: String, receiverID: String, packet: Packet) {
+        this@PacketEngine.responseContracts.remove(packet.conversationID).run {
+            if (this == null) return@run
+            onResolve.accept(packet)
+        }
+    }
+
+    fun handle(senderID: String, receiverID: String, packet: Packet) {
+        if (packet.packetType == PacketType.RESPONSE) {
+            this.handleResponsePacket(senderID, receiverID, packet)
+            return
+        }
+
+        if (packet.layer == PacketLayerType.ENGINE) {
+            this.handleEngineLayerPacket(senderID, receiverID, packet)
+            return
+        }
+
         try {
-            val subscriberContext = PacketSubscriberContext(senderID = senderID, receiverID = receiverID, engine = this@PacketEngine, packet = packet, session = this)
-
-            // TODO: Remove
-            // Fire pre-handling, generic message event
-            println("About to fire SessionPacketReceivedEvent")
-            this.bus.fire(SessionPacketReceivedEvent(subscriberContext))
-
-            if (packet.packetType == PacketType.RESPONSE) {
-                this@PacketEngine.responseContracts.remove(packet.conversationID).run {
-                    if (this == null) return@run
-                    onResolve.accept(packet)
-                }
-                return@with
+            with(requireNotNull(sessions[receiverID]) { "Session '$receiverID' wasn't found." }) {
+                val sessionSubscriberContext = PacketSubscriberContext(senderID = senderID, receiverID = receiverID, engine = this@PacketEngine, packet = packet, session = this)
+                this.bus.fire(SessionPacketReceivedEvent(sessionSubscriberContext))
+                this.subscriber(sessionSubscriberContext)
             }
-
-            // Todo handle engine layer
-            // Handle engine packet-layer messages
-            if (packet.layer == PacketLayerType.ENGINE) {
-                this@PacketEngine.enginePacketLayer(subscriberContext)
-                return@with
-            }
-
-            this.subscriber(subscriberContext)
         } catch (e: Exception) {
-            this@PacketEngine.logger.error("Error while handling packet")
             e.printStackTrace()
         }
     }

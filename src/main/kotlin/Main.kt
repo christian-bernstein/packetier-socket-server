@@ -16,6 +16,8 @@ fun main(args: Array<String>) {
             }
         }.let { listOf(it.id, it.publicToken) }
 
+        println("Session id = '$sessionID'")
+
         PacketierDebuggingClient("attachment-test") {
             attachToSession(sessionID, publicToken)
         }
