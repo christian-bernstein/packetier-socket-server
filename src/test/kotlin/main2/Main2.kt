@@ -15,8 +15,7 @@ fun main(args: Array<String>): Unit = broker(KtorEngine).run {
         this.packetEngine.broadPub(
             Broker.PACKETIER_SERVER_ID, Packet(
             type = "TestPacket"
-        )
-        )
+        ))
     }, 0, 5, TimeUnit.SECONDS)
 
     PacketierDebuggingClient("test") {}
