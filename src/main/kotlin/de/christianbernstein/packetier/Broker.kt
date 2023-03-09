@@ -1,7 +1,7 @@
 package de.christianbernstein.packetier
 
 import de.christianbernstein.packetier.packets.ActivationPacket
-import de.christianbernstein.packetier.socketEngines.ktor.KtorConnection
+import de.christianbernstein.packetier.engine.ktor.KtorConnection
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
