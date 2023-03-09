@@ -17,7 +17,8 @@ class RequestSessionAttachmentPacketEndpoint: Endpoint("RequestSessionAttachment
         // Authentication succeeded, connection will be attached to selected session
 
 
-        broker().getConnection(senderID).packetEngineSessionId = sessionID
+        // broker().getConnection(senderID).packetEngineSessionId = sessionID
+        broker().updateBrokerSessionToPacketierSessionLinkage(senderID, sessionID)
 
 
         finishWithEmptySuccess()

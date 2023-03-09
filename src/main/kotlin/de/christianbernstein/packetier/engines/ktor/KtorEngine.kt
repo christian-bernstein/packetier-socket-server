@@ -124,7 +124,9 @@ object KtorEngine : PacketierSocketEngineBase<KtorConnection>() {
 
     private suspend fun onConnectionInit(connection: KtorConnection) {
         logger.debug("Initiate connection ${connection.id}")
-        this.broker.packetEngine.createSession(connection.id)
+
+        this.broker.createBrokerSession(connection.id, createPacketSession = true)
+
         connections += connection
         logger.debug("Sending activation packet to connection ${connection.id}")
         this.sendActivationPacket(connection.id)

@@ -26,6 +26,8 @@ class Broker<T : PacketierSocketEngineBase<*>>(val socketEngine: T) {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
+    private val brokerSessions = mutableListOf<BrokerSession>()
+
     var packetEngine: PacketEngine = PacketEngine(this.socketEngine.generatePacketierBridge())
 
     init {
@@ -39,6 +41,21 @@ class Broker<T : PacketierSocketEngineBase<*>>(val socketEngine: T) {
 
     fun init(wait: Boolean = false) {
         this.socketEngine.start(wait)
+    }
+
+    fun createBrokerSession(id: String, createPacketSession: Boolean = false): BrokerSession {
+        if (createPacketSession) this.packetEngine.createSession(id)
+        return BrokerSession(
+            internalID = id,
+            engineSessionID = id,
+            packetierSessionID = if (createPacketSession) id else null
+        ).also { this.brokerSessions += it }
+    }
+
+    fun getBrokerSession(id: String): BrokerSession = this.brokerSessions.first { it.internalID == id }
+
+    fun updateBrokerSessionToPacketierSessionLinkage(brokerSessionID: String, newPacketierSessionID: String) {
+        this.getBrokerSession(brokerSessionID).packetierSessionID = newPacketierSessionID
     }
 
     /**
