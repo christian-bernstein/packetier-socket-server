@@ -1,8 +1,7 @@
 package de.christianbernstein.packetier.debug
 
 import de.christianbernstein.packetier.debug.packets.RequestSessionAttachmentPacket
-import de.christianbernstein.packetier.engine.Packet
-import de.christianbernstein.packetier.engine.endpoints.RequestSessionAttachmentPacketEndpoint
+import de.christianbernstein.packetier.Packet
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.http.*

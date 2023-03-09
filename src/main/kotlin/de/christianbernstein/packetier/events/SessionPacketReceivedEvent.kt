@@ -1,6 +1,6 @@
-package de.christianbernstein.packetier.engine.events
+package de.christianbernstein.packetier.events
 
-import de.christianbernstein.packetier.engine.PacketSubscriberContext
+import de.christianbernstein.packetier.PacketSubscriberContext
 import de.christianbernstein.packetier.event.Event
 
 data class SessionPacketReceivedEvent(

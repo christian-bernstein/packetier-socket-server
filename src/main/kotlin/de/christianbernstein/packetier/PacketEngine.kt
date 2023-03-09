@@ -1,8 +1,7 @@
-package de.christianbernstein.packetier.engine
+package de.christianbernstein.packetier
 
-import de.christianbernstein.packetier.broker
-import de.christianbernstein.packetier.engine.endpoints.RequestSessionAttachmentPacketEndpoint
-import de.christianbernstein.packetier.engine.events.SessionPacketReceivedEvent
+import de.christianbernstein.packetier.endpoints.RequestSessionAttachmentPacketEndpoint
+import de.christianbernstein.packetier.events.SessionPacketReceivedEvent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.UUID

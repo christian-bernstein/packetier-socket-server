@@ -1,9 +1,7 @@
 package de.christianbernstein.packetier
 
-import de.christianbernstein.packetier.engine.Packet
-import de.christianbernstein.packetier.engine.PacketEngine
-import de.christianbernstein.packetier.engine.PacketierNetAdapter
-import de.christianbernstein.packetier.engine.packets.ActivationPacket
+import de.christianbernstein.packetier.packets.ActivationPacket
+import de.christianbernstein.packetier.socketEngines.ktor.KtorConnection
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -31,7 +29,7 @@ class Broker {
 
     private val logger = LoggerFactory.getLogger(this.javaClass)
 
-    private val connections = Collections.synchronizedSet<Connection?>(LinkedHashSet())
+    private val connections = Collections.synchronizedSet<KtorConnection?>(LinkedHashSet())
 
     private lateinit var socketEngine: NettyApplicationEngine
 
@@ -73,6 +71,8 @@ class Broker {
         }
     }
 
+
+
     private fun startEmbeddedServer(wait: Boolean): NettyApplicationEngine = embeddedServer(Netty, port = 8080) {
         install(WebSockets)
         this@Broker.initMainSocketRoute(this)
@@ -103,7 +103,7 @@ class Broker {
     private fun initMainSocketRoute(application: Application): Unit {
         application.routing {
             webSocket("main") {
-                val con = Connection(this)
+                val con = KtorConnection(this)
                 try {
                     this@Broker.onConnectionInit(con)
                     for (frame in incoming) {
@@ -119,7 +119,7 @@ class Broker {
         }
     }
 
-    private fun onMessage(connection: Connection, data: String) {
+    private fun onMessage(connection: KtorConnection, data: String) {
         this.packetEngine.handle(
             senderID = connection.id,
             receiverID = PACKETIER_SERVER_ID,
@@ -127,13 +127,13 @@ class Broker {
         )
     }
 
-    private fun onConnectionClose(connection: Connection) {
+    private fun onConnectionClose(connection: KtorConnection) {
         logger.debug("Closing connection ${connection.id}")
         this.packetEngine.closeSession(connection.id)
         connections -= connection
     }
 
-    private suspend fun onConnectionInit(connection: Connection) {
+    private suspend fun onConnectionInit(connection: KtorConnection) {
         logger.debug("Initiate connection ${connection.id}")
         this.packetEngine.createSession(connection.id)
         connections += connection
@@ -141,7 +141,7 @@ class Broker {
         this.sendActivationPacket(connection.id)
     }
 
-    fun getConnection(connectionID: String): Connection = this.connections.first { it.id == connectionID }
+    fun getConnection(connectionID: String): KtorConnection = this.connections.first { it.id == connectionID }
 
     private suspend fun sendActivationPacket(connectionID: String) = this.sendPacket(connectionID, ActivationPacket(connectionID))
 

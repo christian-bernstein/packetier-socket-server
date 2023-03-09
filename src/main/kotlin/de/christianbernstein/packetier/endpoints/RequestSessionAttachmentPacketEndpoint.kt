@@ -1,7 +1,7 @@
-package de.christianbernstein.packetier.engine.endpoints
+package de.christianbernstein.packetier.endpoints
 
 import de.christianbernstein.packetier.broker
-import de.christianbernstein.packetier.engine.Endpoint
+import de.christianbernstein.packetier.Endpoint
 
 class RequestSessionAttachmentPacketEndpoint: Endpoint("RequestSessionAttachmentPacket", {
     val sessionID = packet.getString("sessionID")

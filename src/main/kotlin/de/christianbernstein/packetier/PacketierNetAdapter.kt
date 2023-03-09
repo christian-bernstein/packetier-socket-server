@@ -1,4 +1,4 @@
-package de.christianbernstein.packetier.engine
+package de.christianbernstein.packetier
 
 abstract class PacketierNetAdapter {
 

@@ -1,7 +1,5 @@
-package de.christianbernstein.packetier.engine
+package de.christianbernstein.packetier
 
-import de.christianbernstein.packetier.engine.PacketSubscriber
-import de.christianbernstein.packetier.engine.PacketSubscriberContext
 import java.lang.Exception
 
 fun createProtocol(vararg channels: Pair<String, PacketSubscriberContext.() -> Unit>): PacketSubscriber = with(mapOf(*channels)) {{

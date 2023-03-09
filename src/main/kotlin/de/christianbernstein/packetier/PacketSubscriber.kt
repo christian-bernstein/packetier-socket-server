@@ -1,3 +1,3 @@
-package de.christianbernstein.packetier.engine
+package de.christianbernstein.packetier
 
 typealias PacketSubscriber = (ctx: PacketSubscriberContext) -> Unit

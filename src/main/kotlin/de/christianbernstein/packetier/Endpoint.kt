@@ -1,4 +1,4 @@
-package de.christianbernstein.packetier.engine
+package de.christianbernstein.packetier
 
 @Suppress("MemberVisibilityCanBePrivate")
 open class Endpoint(val name: String, val handler: PacketSubscriberContext.() -> Unit = {}) {

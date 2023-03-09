@@ -1,7 +1,7 @@
-package de.christianbernstein.packetier.engine.packets
+package de.christianbernstein.packetier.packets
 
-import de.christianbernstein.packetier.engine.Packet
-import de.christianbernstein.packetier.engine.PacketLayerType
+import de.christianbernstein.packetier.Packet
+import de.christianbernstein.packetier.PacketLayerType
 
 class ActivationPacket(
     internalSocketConnectionID: String

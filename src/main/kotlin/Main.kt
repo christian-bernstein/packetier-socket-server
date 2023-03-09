@@ -1,7 +1,7 @@
 import de.christianbernstein.packetier.Broker
 import de.christianbernstein.packetier.debug.PacketierDebuggingClient
-import de.christianbernstein.packetier.engine.Packet
-import de.christianbernstein.packetier.engine.events.SessionPacketReceivedEvent
+import de.christianbernstein.packetier.Packet
+import de.christianbernstein.packetier.events.SessionPacketReceivedEvent
 import de.christianbernstein.packetier.event.Event
 
 fun main(args: Array<String>) {

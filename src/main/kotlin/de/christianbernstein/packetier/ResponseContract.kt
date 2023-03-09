@@ -1,6 +1,5 @@
-package de.christianbernstein.packetier.engine
+package de.christianbernstein.packetier
 
-import de.christianbernstein.packetier.engine.Packet
 import java.util.function.Consumer
 
 data class ResponseContract(

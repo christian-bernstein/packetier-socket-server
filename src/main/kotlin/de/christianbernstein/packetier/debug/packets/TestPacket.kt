@@ -1,6 +1,6 @@
 package de.christianbernstein.packetier.debug.packets
 
-import de.christianbernstein.packetier.engine.Packet
+import de.christianbernstein.packetier.Packet
 
 class TestPacket(message: String = "No message provided"): Packet(
     type = "TestPacket",
