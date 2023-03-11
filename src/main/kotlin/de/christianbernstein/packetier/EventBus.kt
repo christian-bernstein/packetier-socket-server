@@ -10,7 +10,7 @@ class EventBus {
         val eventClass = T::class
 
         // TODO: Use logger
-        println("Adding listener to Event-class '${eventClass.qualifiedName}'")
+        // println("Adding listener to Event-class '${eventClass.qualifiedName}'")
 
         val eventListeners: MutableList<IEventListener<out Event>> = listeners.getOrPut(eventClass) { mutableListOf() }
         eventListeners.add(listener)
@@ -19,7 +19,7 @@ class EventBus {
     inline infix fun <reified T: Event> fire(event: T) = listeners[event::class]
 
         // TODO: Remove
-        ?.also { println("listeners: [$it]") }
+        // ?.also { println("listeners: [$it]") }
 
         ?.asSequence()
         ?.filterIsInstance<IEventListener<T>>()
